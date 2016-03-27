@@ -1,0 +1,6 @@
+user: # authorization username
+password: # authorization credentials
+org: # name of org that owns the repo
+repository: # repo name where issues are stored
+zenhub_api_token: # token from settings menu in zenhub https://github.com/ZenHubIO/API
+time_zone: 'America/Los_Angeles' # your local time zone that you're using on command line
