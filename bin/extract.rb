@@ -56,22 +56,24 @@ gh = Github.new
 issues = {}
 
 if options[:milestone]
-  n = 0
-  
-  response = gh.issues.list(
-    repo: config["repository"],
-    filter: "all",
-    state: "all",
-    user: config["org"],
-    milestone: options[:milestone])
+  options[:milestone].split(/,/).each do |milestone|
+    n = 0
     
-  response.each_page do |iss|
-    iss.each do |i| 
-      issues[i.number] = i
-      n += 1
-    end
-  end  
-  date_puts("Found #{n} issues for milestone #{options[:milestone]}")
+    response = gh.issues.list(
+      repo: config["repository"],
+      filter: "all",
+      state: "all",
+      user: config["org"],
+      milestone: milestone)
+      
+    response.each_page do |iss|
+      iss.each do |i| 
+        issues[i.number] = i
+        n += 1
+      end
+    end  
+    date_puts("Found #{n} issues for milestone #{milestone}")
+  end
 end
 
 # get all tickets closed in the specified date range
@@ -109,9 +111,14 @@ end
 repo = gh.repos.get(config["org"], config["repository"])
 zh = Zenhub.new(repo.id, config["zenhub_api_token"])
 
+n = issues.count
+i = 0
+
 rows = issues.values.map do |iss|
-  date_puts("Downloading Zenhub data for ##{iss.number} #{iss.title}")
+  str = "[#{i}/#{n} (#{'%.2f' % (100.0 * i / n)}%)]"
+  date_puts("#{str} Downloading Zenhub data for ##{iss.number} #{iss.title}")
   zhi = zh.issue(iss.number)
+  i += 1
   {
     number: iss.number, 
     title: iss.title,
